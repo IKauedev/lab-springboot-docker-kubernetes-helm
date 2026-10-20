@@ -1,0 +1,35 @@
+# helm upgrade --install lab charts/lab-platform -f charts/lab-platform/values-prod.yaml
+# Só o que difere do dev: volume no Mongo, mais réplicas, HPA, mais recursos.
+
+mongodb:
+  persistence:
+    enabled: true
+    size: 2Gi
+
+employee:
+  replicaCount: 2
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 5
+  resources:
+    requests:
+      cpu: 200m
+      memory: 384Mi
+    limits:
+      cpu: "1"
+      memory: 512Mi
+
+department:
+  replicaCount: 2
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 5
+  resources:
+    requests:
+      cpu: 200m
+      memory: 384Mi
+    limits:
+      cpu: "1"
+      memory: 512Mi

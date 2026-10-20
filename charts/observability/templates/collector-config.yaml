@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "observability.collectorName" . }}
+  labels:
+    {{- include "observability.labels" . | nindent 4 }}
+data:
+  config.yaml: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317
+          http:
+            endpoint: 0.0.0.0:4318
+    processors:
+      memory_limiter:
+        check_interval: 1s
+        limit_mib: 400
+      batch: {}
+    exporters:
+      {{- if .Values.collector.logSpans }}
+      debug:
+        verbosity: basic
+      {{- end }}
+      {{- if .Values.jaeger.enabled }}
+      otlp/jaeger:
+        endpoint: {{ include "observability.jaegerName" . }}:4317
+        tls:
+          insecure: true
+      {{- end }}
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [memory_limiter, batch]
+          exporters:
+            {{- if .Values.collector.logSpans }}
+            - debug
+            {{- end }}
+            {{- if .Values.jaeger.enabled }}
+            - otlp/jaeger
+            {{- end }}

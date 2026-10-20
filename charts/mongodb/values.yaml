@@ -1,0 +1,22 @@
+image:
+  repository: mongo
+  tag: "7"
+  pullPolicy: IfNotPresent
+
+auth:
+  username: root
+  # Só para laboratório. Em produção use Sealed Secrets / External Secrets / SOPS.
+  password: lab-password
+
+# false = emptyDir (dados somem com o pod); true = PersistentVolumeClaim
+persistence:
+  enabled: false
+  size: 1Gi
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi

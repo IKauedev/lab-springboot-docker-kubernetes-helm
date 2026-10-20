@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: department
+  data:
+    mongodb:
+      uri: mongodb://${MONGO_USER:root}:${MONGO_PASSWORD:lab-password}@${MONGO_HOST:localhost}:${MONGO_PORT:27017}/${MONGO_DB:lab}?authSource=admin
+
+management:
+  endpoints.web.exposure.include: health,info
+  endpoint.health.probes.enabled: true
+
+# URL do employee-service; no cluster o chart injeta http://<release>-employee:8080
+employee:
+  url: ${EMPLOYEE_URL:http://localhost:8081}

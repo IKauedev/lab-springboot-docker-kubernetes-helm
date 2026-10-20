@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ include "microservice.fullname" . }}-test
+  labels:
+    {{- include "microservice.labels" . | nindent 4 }}
+  annotations:
+    # só roda em `helm test <release>`; o pod é limpo antes de cada execução
+    "helm.sh/hook": test
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  restartPolicy: Never
+  containers:
+    - name: wget
+      image: busybox:1.36
+      command: ["wget", "-qO-", "http://{{ include "microservice.fullname" . }}:{{ .Values.service.port }}/whoami"]

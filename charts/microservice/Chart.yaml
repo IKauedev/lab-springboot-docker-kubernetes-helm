@@ -1,0 +1,6 @@
+apiVersion: v2
+name: microservice
+description: Chart genérico para um microsserviço Spring Boot (Deployment, Service, ConfigMap, HPA, Ingress)
+type: application
+version: 0.1.0
+appVersion: "1.0.0"

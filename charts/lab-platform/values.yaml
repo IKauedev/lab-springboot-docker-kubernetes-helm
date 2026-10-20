@@ -1,0 +1,48 @@
+# Valores base (ambiente dev). values-prod.yaml sobrescreve só o que muda.
+# Cada bloco abaixo (mongodb, employee, department) é entregue ao subchart de mesmo nome/alias.
+
+global:               # visível em todos os subcharts como .Values.global
+  mongodb:
+    database: lab
+
+seed:
+  enabled: true       # Job hook pós-install que carrega dados de exemplo
+
+mongodb:
+  enabled: true
+  persistence:
+    enabled: false
+
+observability:
+  enabled: true       # OpenTelemetry Collector + Jaeger
+
+employee:
+  nameOverride: employee
+  image:
+    repository: lab/employee
+    tag: "1.0.0"
+  mongo:
+    enabled: true
+  otel:
+    enabled: true
+  ingress:
+    enabled: true
+    host: lab.local
+    path: /employee
+
+department:
+  nameOverride: department
+  image:
+    repository: lab/department
+    tag: "1.0.0"
+  mongo:
+    enabled: true
+  otel:
+    enabled: true
+  config:
+    # `tpl` resolve o nome do release: o department fala com o Service do employee
+    EMPLOYEE_URL: "http://{{ .Release.Name }}-employee:8080"
+  ingress:
+    enabled: true
+    host: lab.local
+    path: /department

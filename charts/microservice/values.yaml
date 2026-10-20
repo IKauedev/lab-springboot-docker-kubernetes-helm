@@ -1,0 +1,64 @@
+# Valores padrão do chart genérico. O chart "lab-platform" sobrescreve estes valores
+# para cada serviço (employee, department) usando aliases de dependência.
+
+nameOverride: ""          # nome curto do serviço; o recurso fica <release>-<nameOverride>
+replicaCount: 1
+
+image:
+  repository: lab/app
+  tag: ""                 # vazio = usa o appVersion do Chart
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8080
+
+# Chaves e valores viram um ConfigMap exposto como variáveis de ambiente (envFrom).
+# Os valores passam por `tpl`, então aceitam templates: "http://{{ .Release.Name }}-employee:8080"
+config: {}
+
+# Passa MONGO_HOST/PORT/USER/PASSWORD/DB para o pod, usando o Secret do chart "mongodb".
+mongo:
+  enabled: false
+
+# Traces via agente Java do OpenTelemetry (já embutido na imagem) enviados ao Collector.
+otel:
+  enabled: false
+  endpoint: ""            # vazio = http://<release>-otel-collector:4317
+
+# Variáveis extras no formato nativo do Kubernetes (aceita valueFrom).
+extraEnv: []
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+probes:
+  liveness:
+    path: /actuator/health/liveness
+    initialDelaySeconds: 45
+    periodSeconds: 15
+  readiness:
+    path: /actuator/health/readiness
+    initialDelaySeconds: 30
+    periodSeconds: 10
+
+# Precisa do addon metrics-server do Minikube.
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 70
+
+# Precisa do addon ingress do Minikube.
+ingress:
+  enabled: false
+  className: nginx
+  host: lab.local
+  path: /app              # /app/x chega no pod como /x (prefixo removido)
+
+podAnnotations: {}

@@ -1,0 +1,5 @@
+target/
+.idea/
+# subcharts empacotados por `helm dependency update`
+charts/lab-platform/charts/*.tgz
+charts/lab-platform/Chart.lock

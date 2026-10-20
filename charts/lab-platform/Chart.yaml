@@ -1,0 +1,28 @@
+apiVersion: v2
+name: lab-platform
+description: Umbrella chart - MongoDB + employee + department, instalados com um único `helm install`
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+
+dependencies:
+  - name: mongodb
+    version: 0.1.0
+    repository: file://../mongodb
+    condition: mongodb.enabled
+
+  - name: observability
+    version: 0.1.0
+    repository: file://../observability
+    condition: observability.enabled
+
+  # o mesmo chart "microservice" reutilizado duas vezes, com aliases e values diferentes
+  - name: microservice
+    alias: employee
+    version: 0.1.0
+    repository: file://../microservice
+
+  - name: microservice
+    alias: department
+    version: 0.1.0
+    repository: file://../microservice

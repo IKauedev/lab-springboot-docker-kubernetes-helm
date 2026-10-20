@@ -1,0 +1,15 @@
+Release "{{ .Release.Name }}" instalado no namespace "{{ .Release.Namespace }}" (revisão {{ .Release.Revision }}).
+
+Acompanhe:
+  kubectl -n {{ .Release.Namespace }} get pods -w
+
+Acesse (sem ingress/tunnel):
+  kubectl -n {{ .Release.Namespace }} port-forward svc/{{ .Release.Name }}-employee 8081:8080
+  curl http://localhost:8081/
+  curl http://localhost:8081/whoami      # muda de pod quando há várias réplicas
+
+  kubectl -n {{ .Release.Namespace }} port-forward svc/{{ .Release.Name }}-department 8082:8080
+  curl http://localhost:8082/1/employees # department chamando employee
+
+Teste do release:   helm test {{ .Release.Name }} -n {{ .Release.Namespace }}
+Histórico:          helm history {{ .Release.Name }} -n {{ .Release.Namespace }}

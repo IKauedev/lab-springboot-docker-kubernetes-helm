@@ -1,0 +1,37 @@
+{{- if .Values.seed.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-seed
+  labels:
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+  annotations:
+    # hook: roda depois do install (não em todo upgrade) e some quando termina com sucesso
+    "helm.sh/hook": post-install
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: 6
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: seed
+          image: curlimages/curl:8.10.1
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -e
+              E=http://{{ .Release.Name }}-employee:8080
+              D=http://{{ .Release.Name }}-department:8080
+              H='Content-Type: application/json'
+              # o hook roda quando os recursos existem, não quando estão prontos: espera o pod responder
+              until curl -sf $E/actuator/health/readiness >/dev/null; do echo "aguardando employee..."; sleep 5; done
+              until curl -sf $D/actuator/health/readiness >/dev/null; do echo "aguardando department..."; sleep 5; done
+              curl -sf -X POST $D/ -H "$H" -d '{"id":1,"name":"Engineering"}'
+              curl -sf -X POST $D/ -H "$H" -d '{"id":2,"name":"Sales"}'
+              curl -sf -X POST $E/ -H "$H" -d '{"name":"Ana","position":"Developer","departmentId":1}'
+              curl -sf -X POST $E/ -H "$H" -d '{"name":"Bruno","position":"SRE","departmentId":1}'
+              curl -sf -X POST $E/ -H "$H" -d '{"name":"Carla","position":"Account Manager","departmentId":2}'
+              echo "seed concluído"
+{{- end }}
